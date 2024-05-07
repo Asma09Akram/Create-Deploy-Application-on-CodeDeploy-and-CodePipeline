@@ -1,0 +1,18 @@
+## Task 1: Sign in to AWS Management Console
+## Task 2: Launching an EC2 Instance
+
+2.1. Amazon Linux 2 AMI
+
+2.2. Instance type t2.micro
+
+2.3 .Create a key pair
+
+2.4. Create new security group with SSH and HTTP ports open from anywhere.
+  2.4.1 Name the security group as CodePipeline-SG""
+  2.4.2 
+
+
+2.5. No. of instances as 1
+
+2.6. Click on Create instance
+
