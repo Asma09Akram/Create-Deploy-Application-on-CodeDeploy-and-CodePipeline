@@ -1,6 +1,23 @@
-## Task 1: Sign in to AWS Management Console
-## Task 2: Launching an EC2 Instance
+## What is AWS CodePipeline?
+AWS CodePipeline is a continuous delivery service you can use to model, visualize, and automate the steps required to release your software. You can quickly model and configure the different stages of a software release process. CodePipeline automates the steps required to release your software changes continuously.
 
+Source: It refers to the repository where the source code and its revisions are stored, which could be an Amazon S3 Bucket, a CodeCommit repository, or Git-based repositories like GitHub and Bitbucket.
+Build: During the build phase, the buildspec.yml file is pivotal. Here, software undergoes testing and construction.
+Staging: Staging is where code is deployed into a testing environment, also known as a pre-production environment. This phase allows for thorough software testing before making it live for public users. It’s an optional stage if the application has already undergone comprehensive testing prior to being uploaded to the source.
+Using AWS CodePipeline, applications can be deployed on Amazon EC2 Instances using CodeDeploy, Elastic Beanstalk, or AWS OpsWorks Stacks.
+
+Now lets learn how to set up a two-stage pipeline utilizing an Amazon S3 bucket with versioning enabled, and employ AWS CodePipeline to deploy a sample application.
+Step 1: Sign in to AWS Management Console
+Step 2: Launching an EC2 Instance
+Step 3: SSH into the instance
+Step 4: Install AWS CLI, and CodeDeploy Agent
+Step 5: Create S3 bucket for your application
+Step 6: Create a CodeDeploy application and Deployment group.
+Step 7: Create your first pipeline in CodePipeline and deploy the application on the instance
+Step 8: Test the application using EC2 Instance Public IPv4 DNS
+Step 9: Clean up resources
+### Task 1: Sign in to AWS Management Console
+### Task 2: Launching an EC2 Instance
 2.1. Amazon Linux 2 AMI
 
 2.2. Instance type t2.micro
@@ -8,11 +25,140 @@
 2.3 .Create a key pair
 
 2.4. Create new security group with SSH and HTTP ports open from anywhere.
-  2.4.1 Name the security group as CodePipeline-SG""
-  2.4.2 
+2.4.1 Name the security group as “CodePipeline-SG”
 
 
 2.5. No. of instances as 1
 
 2.6. Click on Create instance
 
+
+### Task 3: SSH into EC2 Instance
+
+###Task 4: Install AWS CLI, and CodeDeploy Agent
+4.1 Switch to root user, and Run the updates.
+
+```
+sudo su
+yum update -y
+```
+
+4.2 Install the CodeDeploy agent: Install the prerequisite ruby and wget : This command installs the Ruby programming language and the wget utility. Ruby is a prerequisite for installing the CodeDeploy agent, and wget is used to download the agent’s installer.
+```
+yum install ruby wget -y
+```
+4.3 Download the CodeDeploy agent’s installer : This command uses wget to download the CodeDeploy agent’s installer from the specified URL. The installer is a script that sets up the CodeDeploy agent on the EC2 instance.
+```
+wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+```
+4.4 Change the permission of the installer
+```
+chmod +x ./install
+```
+4.5 Install the latest version of the CodeDeploy agent : This command runs the CodeDeploy agent’s installer script in auto mode. The auto mode automatically detects the instance’s operating system and installs the agent accordingly.
+```
+sudo ./install auto
+```
+4.6 Check that the service is running : This command checks the status of the CodeDeploy agent service. It confirms whether the agent is running or not. If the output shows that the agent is running, it indicates that the installation was successful.
+```
+service codedeploy-agent status
+```
+### Task 5. Create S3 bucket for your application
+5.1 Go to S3 bucket
+
+5.2 Create S3 bucket
+
+Enable Bucket Versioning
+Uncheck Block public access (bucket settings)
+5.3 Upload the following file in S3 bucket and open the file and then copy the key
+
+SampleApp_LinuxCodeDeployCodePipeline.zip
+Edit description
+drive.google.com
+
+SampleApp_LinuxCodeDeployCodePipeline.zip
+
+### Task 6. Create a CodeDeploy application and Deployment group.
+6.1 Navigate to CodeDeploy and click on Applications
+
+6.2 Click on Create Application
+
+* Give the name as MySampleApp
+
+* Select Ec2/On-premises as Compute Platform
+
+* And Click on Create application
+
+6.3 Click on Create Deployment group
+
+Give name of Deployment Group as My_DepGroup
+Create a Service Role for CodeDeploy and use as the Service Role in the drop down
+
+Choose Deployment Type as In Place
+Environment Configuration, Select EC2 Instances
+Give the tag
+Key: Name
+Value: MyEC2
+
+
+
+It will show matching instances as “1 unique matched instance”
+Select Never with Agent configuration with AWS Systems Manager
+
+Deployment settings as CodeDeployDefault.AllAtOnce
+
+Uncheck “Enable Load Balancing”
+
+Click on create deployment group
+
+### Task 7: Create your first pipeline in CodePipeline and deploy the application on the instance
+7.1 Navigate to CodePipeline and click on Pipelines from the left sidebar and then click on the Create pipeline
+
+7.2 Give name as “MySamplePipeline”
+
+
+7.3 Create new service role
+
+
+7.4 Click on Advanced Settings
+
+Select Custom location in Artifact store
+Select the Bucket name starting with “mybucket “
+
+Click on Next button
+Source provider: Select Amazon S3 from dropdown
+Bucket: Select mybucket
+S3 object key: Enter SampleApp_LinuxCodeDeployCodePipeline.zip
+Change detection options: Select AWS CodePipeline
+Click on the Next button.
+
+7.5 Add build stage :
+
+Click on the Skip build stage.
+
+7.6 Add deploy stage :
+
+Deploy provider: Select AWS CodeDeploy from dropdown
+Region: Asia Pacific(Mumbai)
+Application name: Select “MySampleApp”
+Deployment group: Select “My_DepGroup”
+Click on the Next button.
+
+7.7 Review and Click on Create Pipeline
+
+
+CodePipeline has started to run and will succeed.
+
+### Task 8: Test the application using EC2 Instance Public IPv4 DNS
+8.1 Go to EC2 Instance, click on the instance which we have created in Step2,
+
+8.3 Copy the Public IPv4 DNS and paste in the browser window.
+
+
+
+### Task 9: Clean up resources
+9.1 Clean of all the resources by deleting the pipeline, applications in Code Deployment, S3 bucket, EC2 Instance.
+
+AWS CodePipeline for Containers is now generally available. This advancement empowers developers to effortlessly construct, assess, and roll out container images to any container registry or Kubernetes cluster via CodePipeline. With CodePipeline for Containers, developers can leverage familiar container tools and workflows to oversee their CI/CD pipelines for containerized applications. They can precisely define the build and test stages of their pipeline utilizing Dockerfiles and container images, subsequently deploying these images to their preferred container orchestration platform, be it Amazon Elastic Kubernetes Service (EKS) or Amazon Elastic Container Service (ECS). This innovation offers developers a more seamless and effective approach to handle their container deployments, simplifying the process of building and releasing containerized applications with enhanced speed and agility.
+
+Appreciate your time reading! If you found value in this article, a round of applause (👏) would be fantastic to help others discover it. Feel free to share your insights and comments below; I’m eager to hear your thoughts!
